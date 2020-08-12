@@ -23,7 +23,7 @@ router.get('/getByFilters/', async (req, res) => {
 
         //Create the filters' object
         let filters = {};
-        if (req.query.name && req.query.name !== "") filters = { ...filters, name: { $regex: new RegExp(req.query.name, "i")} }
+        if (req.query.name && req.query.name !== "") filters = { ...filters, name: { $regex: new RegExp(req.query.name, "i") } }
         if (req.query.description && req.query.description !== "") filters = { ...filters, description: { $regex: new RegExp(req.query.description, "i") } }
         if (req.query.category && req.query.category !== "") filters = { ...filters, category: req.query.category }
         if (req.query.code && req.query.code !== "") filters = { ...filters, code: { $regex: req.query.code } }
@@ -75,50 +75,59 @@ router.post('/add/', async (req, res) => {
 //Add list of products
 router.post('/addList/', async (req, res) => {
 
-    //Variables
-    let productsWithError = [];
+    try {
+        //Variables
+        let productsWithError = [];
 
-    //Foreach product
-    // req.body.products.forEach(element => {
-    for (let index = 0; index < req.body.products.length; index++) {    
+        //Foreach product
+        for (let index = 0; index < req.body.products.length; index++) {
 
-        //Product
-        const element = req.body.products[index];
+            //Product
+            const element = req.body.products[index];
 
-        //Create the product
-        const product = new Product({
-            name: element.name,
-            description: element.description,
-            category: element.category,
-            code: element.code,
-            price: element.price,
-            brand: element.brand
-        })
+            //Create the product
+            const product = new Product({
+                name: element.name,
+                description: element.description,
+                category: element.category,
+                code: element.code,
+                price: element.price,
+                brand: element.brand
+            })
 
-        //Save de product
-        try {
-            await product.save();
-        } catch (error) {
-            productsWithError.push({ messageError: error.toString(), product: product });
+            //Save de product
+            try {
+                await product.save();
+            } catch (error) {
+                productsWithError.push({ messageError: error.toString(), product: product });
+            }
+
         }
 
+        res.status(200).send({ message: "Products created correctly", listErrors: productsWithError });
+        
+    } catch (error) {
+        res.status(400).send({ errorMessage: error.toString() });
     }
 
-    //There were any error?
-    if(productsWithError.length === 0){
-        res.status(200).send({ message: "Products created correctly"});
-    }
-    else {
-        res.status(400).send({ errorMessage: "There were error in some products", listError: productsWithError });
-    }
 });
 
 //Delete product
 router.delete('/delete/', async (req, res) => {
     //Save de product
     try {
-        const product = await Product.remove({ _id: req.body.id});
-        res.status(200).send({ message: "Product deleted correctly", product: product._id });
+        const product = await Product.deleteOne({ _id: req.query.id });
+        res.status(200).send({ product: product, message: "Product deleted correctly", product: product._id });
+    } catch (error) {
+        res.status(400).send({ catchMessage: error.toString() });
+    }
+});
+
+//Update product
+router.put('/update/', async (req, res) => {
+    try {
+        const product = await Product.updateOne({ _id: req.query.id }, req.body);
+        res.status(200).send({ product: product, message: "Product updated correctly", product: product._id });
     } catch (error) {
         res.status(400).send({ catchMessage: error.toString() });
     }
