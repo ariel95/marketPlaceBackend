@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const Product = require('../models/Product');
 
-
 //Get product by id
 router.get('/getById/', async (req, res) => {
     try {
@@ -54,14 +53,7 @@ router.get('/getByFilters/', async (req, res) => {
 router.post('/add/', async (req, res) => {
 
     //Create the product
-    const product = new Product({
-        name: req.body.name,
-        description: req.body.description,
-        category: req.body.category,
-        code: req.body.code,
-        price: req.body.price,
-        brand: req.body.brand
-    })
+    const product = generateProductSchema(req.body);
 
     //Save de product
     try {
@@ -86,14 +78,7 @@ router.post('/addList/', async (req, res) => {
             const element = req.body.products[index];
 
             //Create the product
-            const product = new Product({
-                name: element.name,
-                description: element.description,
-                category: element.category,
-                code: element.code,
-                price: element.price,
-                brand: element.brand
-            })
+            const product = generateProductSchema(element);
 
             //Save de product
             try {
@@ -105,7 +90,7 @@ router.post('/addList/', async (req, res) => {
         }
 
         res.status(200).send({ message: "Products created correctly", listErrors: productsWithError });
-        
+
     } catch (error) {
         res.status(400).send({ errorMessage: error.toString() });
     }
@@ -132,6 +117,19 @@ router.put('/update/', async (req, res) => {
         res.status(400).send({ catchMessage: error.toString() });
     }
 });
+
+
+//Functions
+const generateProductSchema = (element) => {
+    return new Product({
+        name: element.name,
+        description: element.description,
+        category: element.category,
+        code: element.code,
+        price: element.price,
+        brand: element.brand
+    });
+}
 
 
 module.exports = router;
