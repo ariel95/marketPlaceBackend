@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const cors = require('cors')
 
 //Enviroment var
 dotenv.config();
@@ -25,6 +26,7 @@ mongoose.connect(dbConnection,
 
 //Middleware
 app.use(express.json());
+app.use(cors())
 
 //Router middlewares
 app.use('/api/users', usersRoutes);
